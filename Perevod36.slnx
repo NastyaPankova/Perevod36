@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Perevod36.Client/Perevod36.Client.csproj" />
+  <Project Path="Perevod36/Perevod36.csproj" />
+</Solution>
