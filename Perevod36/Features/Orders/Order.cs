@@ -2,6 +2,10 @@
 using Perevod36.Features.Common;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Perevod36.Features.Customers;
+using Perevod36.Features.Managers;
+using Perevod36.Features.Translators;
+using Perevod36.Features.TranslationTypes;
 
 namespace Perevod36.Features.Orders
 {
@@ -19,13 +23,13 @@ namespace Perevod36.Features.Orders
         [Precision(10, 2)]
         public decimal Cost { get; set; }
 
-        public ClientId ClientId { get; set; }
-        public TranslatorId TranslatorId { get; set; }
-        public ManagerId ManagerId { get; set; }
+        public Guid CustomerId { get; set; }
+        public Guid TranslatorId { get; set; }
+        public Guid ManagerId { get; set; }
         public TranslationTypeId TranslationTypeId { get; set; }
 
     
-        public Client Client { get; set; } = null!;
+        public Customer Customer { get; set; } = null!;
         public Translator Translator { get; set; } = null!;
         public Manager Manager { get; set; } = null!;
         public TranslationType TranslationType { get; set; } = null!;
