@@ -28,6 +28,17 @@ public class DbInit
         await dbContext.SaveChangesAsync();
 
         //заполнение БД
+        var translationTypes = InitialDbData.TranslationTypes.Values;
+        await dbContext.TranslationTypes.AddRangeAsync(translationTypes);
+        await dbContext.SaveChangesAsync();
+
+        var offices = InitialDbData.Offices.Values;
+        await dbContext.Offices.AddRangeAsync(offices);
+        await dbContext.SaveChangesAsync();
+
+        var languages = InitialDbData.Languages.Values;
+        await dbContext.Languages.AddRangeAsync(languages);
+        await dbContext.SaveChangesAsync();
 
 
     }

@@ -6,8 +6,9 @@ namespace Perevod36.Features.ApplicationUsers;
 
 public class ApplicationUser : IdentityUser<Guid>
 {
+    //хранение ФИО в одной колонке вместо трех - сознательное решение для упрощения
     [Required]
     [MaxLength(Constants.MaxLenghtName)]
-    public required string FullName { get; set; }
+    public string FullName { get; set; }
 
 }
