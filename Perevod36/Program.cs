@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Perevod36.Client.Pages;
 using Perevod36.Components;
 using Perevod36.Data;
+using Perevod36.Features.ApplicationUsers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         connectionString,
         ServerVersion.AutoDetect(connectionString)
     ));
+builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
+    .AddEntityFrameworkStores<AppDbContext>();
 
 var app = builder.Build();
 
@@ -42,5 +45,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Perevod36.Client._Imports).Assembly);
+
+await DbInit.Seed(app);
 
 app.Run();

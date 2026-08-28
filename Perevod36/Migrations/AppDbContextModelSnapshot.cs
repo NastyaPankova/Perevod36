@@ -314,6 +314,10 @@ namespace Perevod36.Migrations
                     b.Property<int>("NumberOfPages")
                         .HasColumnType("int");
 
+                    b.Property<string>("OrderNumber")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<int>("TranslationTypeId")
                         .HasColumnType("int");
 
