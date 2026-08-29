@@ -174,6 +174,20 @@ public class DbInit
         order_5.CreateOrderNumber();
         await dbContext.Orders.AddAsync(order_5);
 
+        translationType = InitialDbData.TranslationTypes["Passport"];
+        orderCustomer = InitialDbData.Customers["Tinky"];
+        var order_6 = new Order
+        {
+            NumberOfPages = 3,
+            TranslationType = translationType,
+            Customer = orderCustomer,
+            TranslatorId = new TranslatorId(InitialDbData.Translators["Fed"].Id).Id,
+            ManagerId = new ManagerId(InitialDbData.Managers["Petrova"].Id).Id
+        };
+        order_6.CalculateCost();
+        order_6.CreateOrderNumber();
+        await dbContext.Orders.AddAsync(order_6);
+
         await dbContext.SaveChangesAsync();
 
     }
