@@ -3,6 +3,7 @@ using Perevod36.Client.Pages;
 using Perevod36.Components;
 using Perevod36.Data;
 using Perevod36.Features.ApplicationUsers;
+using Perevod36.Features.Orders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +46,8 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Perevod36.Client._Imports).Assembly);
+
+app.MapReportsEndpoints();
 
 await DbInit.Seed(app);
 

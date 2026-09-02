@@ -1,43 +1,56 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Perevod36.Data;
+using Perevod36.Features.Reports.Dto;
+
 
 namespace Perevod36.Features.Orders;
 
+
+//расширение для текущего app, добавляющее маршруты (по типу app.MapOrders вместо системного app.Map в program.cs)
 public static class ReportsEndpoints
 {
-    
-    public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder app)
+    // app - экземпрял текущего приложения 
+    public static IEndpointRouteBuilder MapReportsEndpoints(this IEndpointRouteBuilder app)
     {
-        
-        var group = app.MapGroup("/api/v1/orders");
 
-        
-        group.MapGet("/by-day/{date:datetime}", async (DateTime date, AppDbContext db) =>
-        {
-           
-            var ordersFromDb = await db.Orders
-                .AsNoTracking()
-                .Where(o => o.Created == DateOnly.FromDateTime(date))
-                .Include(o => o.TranslationType)
-                .ToListAsync();
+        var reportsGroup = app.MapGroup("/api/v1/reports");
 
-            decimal totalSum = ordersFromDb.Sum(o => o.Cost);
-
-            var orderDtos = ordersFromDb.Select(o => new {
-                o.OrderNumber,
-                o.TranslationType.TranslationTypeName,
-                o.NumberOfPages,
-                o.Cost
-            }).ToList();
-
-            return Results.Ok(new
-            {
-                Date = date.ToString("dd.MM.yyyy"),
-                Total = totalSum,
-                Orders = orderDtos
-            });
-        });
+        reportsGroup.MapGet("/reportsByDay/{date:datetime}", GetReportsByDay);
 
         return app;
+    }
+
+    //date придет из URL, db из DI, в mapget параметры не передаются
+    public static async Task<IResult> GetReportsByDay(DateTime date, AppDbContext db)
+    {
+
+        var orders = await db.Orders
+            .AsNoTracking()
+            .Where(o => o.Created == DateOnly.FromDateTime(date))
+            .Include(o => o.TranslationType)
+            .Include(o => o.Customer)
+            .Include(o => o.Manager)
+            .Include(o => o.Translator)
+            .Select(s => new OrderDto
+            (
+                s.OrderNumber,
+                s.TranslationType.TranslationTypeName,
+                s.Customer.FullName,
+                s.Manager.FullName,
+                s.Translator.FullName,
+                s.NumberOfPages,
+                s.Cost))
+            .ToListAsync();
+
+        decimal total = orders.Sum(o => o.Cost);
+
+        var response = new OrdersByDayDto
+        (
+            DateOnly.FromDateTime(date),
+            total,
+            orders
+        );
+
+        return Results.Ok(response);
     }
 }
