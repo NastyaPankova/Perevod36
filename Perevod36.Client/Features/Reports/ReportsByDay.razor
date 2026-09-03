@@ -92,7 +92,7 @@
         {
             string formattedDate = SelectedDate.ToString("yyyy-MM-dd");
             
-            Data = await Http.GetFromJsonAsync<OrdersByDayDto>($"/api/v1/orders/by-day/{formattedDate}");
+            Data = await Http.GetFromJsonAsync<OrdersByDayDto>($"/api/v1/reports/reportsByDay/{formattedDate}");
         }
         catch (Exception ex)
         {
