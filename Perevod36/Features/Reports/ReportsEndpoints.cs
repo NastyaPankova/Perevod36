@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Perevod36.Data;
-using Perevod36.Features.Reports.Dto;
+using Perevod36.Client.Shared.Dto.Orders;
 
 
 namespace Perevod36.Features.Orders;

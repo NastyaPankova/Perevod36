@@ -23,6 +23,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentityApiEndpoints<ApplicationUser>()
     .AddEntityFrameworkStores<AppDbContext>();
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(builder.Configuration["BackendUrl"]!)
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

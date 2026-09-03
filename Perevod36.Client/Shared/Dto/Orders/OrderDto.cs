@@ -1,4 +1,4 @@
-﻿namespace Perevod36.Features.Reports.Dto;
+﻿namespace Perevod36.Client.Shared.Dto.Orders;
 
 //один заказ
 public record OrderDto(
