@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Perevod36.Data;
 using Perevod36.Client.Shared.Dto.Orders;
-
+using Perevod36.Data;
 
 namespace Perevod36.Features.Orders;
 
@@ -15,7 +14,8 @@ public static class ReportsEndpoints
 
         var reportsGroup = app.MapGroup("/api/v1/reports");
 
-        reportsGroup.MapGet("/reportsByDay/{date:datetime}", GetReportsByDay);
+        reportsGroup.MapGet("/getReportsByDay/{date:datetime}", GetReportsByDay);
+        reportsGroup.MapGet("/getOrdersTypeStatistics/", GetOrdersTypeStatistics);
 
         return app;
     }
@@ -44,7 +44,7 @@ public static class ReportsEndpoints
 
         decimal total = orders.Sum(o => o.Cost);
 
-        var response = new OrdersByDayDto
+        var response = new ReportsByDayDto
         (
             DateOnly.FromDateTime(date),
             total,
@@ -52,5 +52,24 @@ public static class ReportsEndpoints
         );
 
         return Results.Ok(response);
+    }
+
+    public static async Task<IResult> GetOrdersTypeStatistics(AppDbContext db)
+    {
+
+        var orders = await db.TranslationTypes
+        .AsNoTracking()
+        .GroupJoin(
+            db.Orders,
+            translationType => translationType.Id,
+            order => order.TranslationTypeId,
+            (translationType, ordersGroup) => new OrdersTypeStatisticsDto
+            (
+                translationType.TranslationTypeName,
+                ordersGroup.Count()       
+            ))
+         .ToListAsync();
+
+        return Results.Ok(orders);
     }
 }

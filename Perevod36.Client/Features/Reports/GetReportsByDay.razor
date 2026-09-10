@@ -1,4 +1,4 @@
-﻿@page "/reportsByDay"
+﻿@page "/getReportsByDay"
 @using System.Net.Http.Json
 @using Perevod36.Client.Shared.Dto.Orders
 @inject HttpClient Http
@@ -84,7 +84,7 @@
 
 @code {
     private DateTime SelectedDate { get; set; } = DateTime.UtcNow.Date;
-    private OrdersByDayDto? Data { get; set; } 
+    private ReportsByDayDto? Data { get; set; }
     private bool IsLoading { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
@@ -99,7 +99,7 @@
         {
             string formattedDate = SelectedDate.ToString("yyyy-MM-dd");
             
-            Data = await Http.GetFromJsonAsync<OrdersByDayDto>($"/api/v1/reports/reportsByDay/{formattedDate}");
+            Data = await Http.GetFromJsonAsync<ReportsByDayDto>($"/api/v1/reports/getReportsByDay/{formattedDate}");
         }
         catch (Exception ex)
         {
