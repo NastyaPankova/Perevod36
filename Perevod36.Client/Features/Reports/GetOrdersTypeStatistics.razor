@@ -74,8 +74,9 @@
     {
         IsLoading = true;
         try
-        {      
-            Statistics = await Http.GetFromJsonAsync<List<OrdersTypeStatisticsDto>>("/api/v1/reports/getOrdersTypeStatistics");
+        {
+            var url = "/api/v1/reports/getOrdersTypeStatistics";
+            Statistics = await Http.GetFromJsonAsync<List<OrdersTypeStatisticsDto>>(url);
         }
         catch (Exception ex)
         {

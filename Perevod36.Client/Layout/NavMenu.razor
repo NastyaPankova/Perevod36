@@ -13,6 +13,11 @@
                 <span class="bi bi-house-door-fill me-2" aria-hidden="true"></span> Home
             </NavLink>
         </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link  lh-sm d-flex align-items-center" href="getOrdersByUser" Match="NavLinkMatch.All">
+                <span class="bi bi-person-lines-fill me-2" aria-hidden="true"></span> Заказы пользователя
+            </NavLink>
+        </div>
 
         <div class="nav-item px-3">
             <button class="nav-link w-100 text-start bg-transparent border-0 d-flex align-items-center justify-content-between"
@@ -30,13 +35,13 @@
             {
                 <div class="nav flex-column ps-4 animate-fade-in">
                     <div class="nav-item py-1">
-                        <NavLink class="nav-link text-white-50" href="getReportsByDay">
+                        <NavLink class="nav-link text-white-50 lh-sm d-flex align-items-center" href="getReportsByDay">
                             <span class="bi bi-file-earmark-text me-2"></span> Заказы за день
                         </NavLink>
                     </div>
                     <div class="nav-item py-1">
-                        <NavLink class="nav-link text-white-50" href="getOrdersTypeStatistics">
-                            <span class="bi bi-file-earmark-text me-2"></span> Статистика типов переводов
+                        <NavLink class="nav-link text-white-50 lh-sm d-flex align-items-center" href="getOrdersTypeStatistics">
+                            <span class="bi bi-file-earmark-text me-2"></span> Переводимые документы
                         </NavLink>
                     </div>
                 </div>

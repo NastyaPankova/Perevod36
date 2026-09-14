@@ -3,6 +3,7 @@
 //один заказ
 public record OrderDto(
     string OrderNumber,
+    DateOnly Created,
     string TranslationTypeName,
     string Customer,
     string Manager,
