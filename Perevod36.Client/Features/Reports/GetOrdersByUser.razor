@@ -113,6 +113,8 @@
             }
             else if (response.IsSuccessStatusCode)
             {
+                //повторно инициализируем orders пустым списком, если пришел null
+                //если этого не сделать, то orders инициализируются пришедшим null-ом и всё упадет
                 Orders = await response.Content.ReadFromJsonAsync<List<OrderDto>>() ?? new List<OrderDto>();
             }
             else

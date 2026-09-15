@@ -18,6 +18,7 @@ public static class ReportsEndpoints
         reportsGroup.MapGet("/getReportsByDay/{date:datetime}", GetReportsByDay);
         reportsGroup.MapGet("/getOrdersTypeStatistics/", GetOrdersTypeStatistics);
         reportsGroup.MapGet("/getOrdersByUser/", GetOrdersByUser);
+        reportsGroup.MapGet("/getOrdersByUserSort/", GetOrdersByUser);
 
         return app;
     }
