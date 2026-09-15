@@ -1,4 +1,4 @@
-﻿@page "/getOrdersByUser"
+﻿@page "/reports/getOrdersByUser"
 @using System.Net.Http.Json
 @using System.Net
 @using Perevod36.Client.Shared.Dto.Orders
@@ -24,7 +24,6 @@
             </div>
         </div>
     }
-
     else
     {
         if (IsUserNotFound)
@@ -38,13 +37,13 @@
             if (Orders != null && !Orders.Any())
             {
                 <div class="alert alert-info text-center shadow-sm">
-                   Заказы не найдены
+                    Заказы не найдены
                 </div>
             }
             else
             {
                 <div class="mb-3">
-                    <h4>Результаты поиска для: <span class="text-primary">@Orders.FirstOrDefault().Customer</span></h4>
+                    <h4>Результаты поиска для: <span class="text-primary">@Orders.FirstOrDefault()?.Customer</span></h4>
                 </div>
 
                 <div class="table-responsive shadow-sm rounded">
@@ -52,16 +51,24 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>№ Заказа</th>
-                                <th>Дата создания</th>
-                                <th>Тип перевода</th>
+                                <th @onclick="@(() => SortTable(OrderColumns.Created))" style="cursor: pointer; user-select: none;">
+                                    Дата создания <i class="@Arrow(OrderColumns.Created)"></i>
+                                </th>
+                                <th @onclick="@(() => SortTable(OrderColumns.TranslationTypeName))" style="cursor: pointer; user-select: none;">
+                                    Тип перевода <i class="@Arrow(OrderColumns.TranslationTypeName)"></i>
+                                </th>
                                 <th>Менеджер</th>
                                 <th>Переводчик</th>
-                                <th class="text-center">Страниц</th>
-                                <th class="text-end">Стоимость</th>
+                                <th @onclick="@(() => SortTable(OrderColumns.NumberOfPages))" class="text-center" style="cursor: pointer; user-select: none;">
+                                    Страниц <i class="@Arrow(OrderColumns.NumberOfPages)"></i>
+                                </th>
+                                <th @onclick="@(() => SortTable(OrderColumns.Cost))" class="text-end" style="cursor: pointer; user-select: none;">
+                                    Стоимость <i class="@Arrow(OrderColumns.Cost)"></i>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var order in Orders)
+                            @foreach (var order in SortedOrders)
                             {
                                 <tr>
                                     <td class="fw-semibold text-dark">@order.OrderNumber</td>
@@ -85,11 +92,67 @@
     //email в процессе ввода
     private string? Email { get; set; }
     //email фактически введеный
-    private string? SearchedEmail { get; set; } 
+    private string? SearchedEmail { get; set; }
     //предварительная инициализация orders пустым списком, иначе падает
     private List<OrderDto> Orders { get; set; } = new List<OrderDto>();
     private bool IsLoading { get; set; } = false;
     private bool IsUserNotFound { get; set; } = false;
+
+   
+    private string sortBy = "";
+    private bool isAsc = true;
+
+    //названия столбцов сортировки
+    //nameOf - если изменим имя в dto, то тут заметим
+    public static class OrderColumns
+    {
+        public const string Created = nameof(Created);
+        public const string TranslationTypeName = nameof(TranslationTypeName);
+        public const string NumberOfPages = nameof(NumberOfPages);
+        public const string Cost = nameof(Cost);
+    }
+
+   
+    private IEnumerable<OrderDto> SortedOrders
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(sortBy)) return Orders;
+
+            //упрощенный switch для одной переменной
+            return sortBy switch
+            {
+                OrderColumns.Created => isAsc ? Orders.OrderBy(o => o.Created) : Orders.OrderByDescending(o => o.Created),
+                OrderColumns.TranslationTypeName => isAsc ? Orders.OrderBy(o => o.TranslationTypeName) : Orders.OrderByDescending(o => o.TranslationTypeName),
+                OrderColumns.NumberOfPages => isAsc ? Orders.OrderBy(o => o.NumberOfPages) : Orders.OrderByDescending(o => o.NumberOfPages),
+                OrderColumns.Cost => isAsc ? Orders.OrderBy(o => o.Cost) : Orders.OrderByDescending(o => o.Cost),
+                //ниже - значение по-умолчанию (default)
+                _ => Orders
+            };
+        }
+    }
+
+    //по клику меняет состояния переменной, запускается перерендер страницы,
+    //повторно запускается SortedOrders с нужно сортировкой
+    private void SortTable(string columnName)
+    {
+        if (sortBy == columnName)
+        {
+            isAsc = !isAsc;
+        }
+        else
+        {
+            sortBy = columnName;
+            isAsc = true;
+        }
+    }
+
+
+    private string Arrow(string columnName)
+    {
+        if (sortBy != columnName) return "bi bi-arrow-down-up";
+        return isAsc ? "bi bi-arrow-up" : "bi bi-arrow-down";
+    }
 
     private async Task FetchOrdersAsync()
     {
@@ -97,12 +160,13 @@
 
         IsLoading = true;
         IsUserNotFound = false;
-        Orders = null;
+        Orders = new List<OrderDto>();
+        sortBy = "";
         SearchedEmail = Email.Trim();
 
         try
         {
-            //формирование номального email из введенной строки (замена спец символов, пробелы и т.д.) для сетевых протоколов 
+            //формирование номального email из введенной строки (замена спец символов, пробелы и т.д.) для сетевых протоколов
             var email = Uri.EscapeDataString(SearchedEmail);
             var url = $"/api/v1/reports/getOrdersByUser?email={email}";
             var response = await Http.GetAsync(url);

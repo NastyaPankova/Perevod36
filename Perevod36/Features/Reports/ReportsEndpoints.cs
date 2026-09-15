@@ -15,10 +15,9 @@ public static class ReportsEndpoints
 
         var reportsGroup = app.MapGroup("/api/v1/reports");
 
-        reportsGroup.MapGet("/getReportsByDay/{date:datetime}", GetReportsByDay);
-        reportsGroup.MapGet("/getOrdersTypeStatistics/", GetOrdersTypeStatistics);
-        reportsGroup.MapGet("/getOrdersByUser/", GetOrdersByUser);
-        reportsGroup.MapGet("/getOrdersByUserSort/", GetOrdersByUser);
+        reportsGroup.MapGet("getReportsByDay/{date:datetime}", GetReportsByDay);
+        reportsGroup.MapGet("getOrdersTypeStatistics/", GetOrdersTypeStatistics);
+        reportsGroup.MapGet("getOrdersByUser/", GetOrdersByUser);
 
         return app;
     }
