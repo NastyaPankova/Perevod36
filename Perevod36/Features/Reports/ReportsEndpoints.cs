@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Perevod36.Client.Shared.Dto.Orders;
 using Perevod36.Data;
+using Perevod36.Features.Common;
 
 
 namespace Perevod36.Features.Orders;
@@ -18,6 +19,7 @@ public static class ReportsEndpoints
         reportsGroup.MapGet("getReportsByDay/{date:datetime}", GetReportsByDay);
         reportsGroup.MapGet("getOrdersTypeStatistics/", GetOrdersTypeStatistics);
         reportsGroup.MapGet("getOrdersByUser/", GetOrdersByUser);
+        reportsGroup.MapGet("getOrderById/", GetOrderById);
 
         return app;
     }
@@ -65,7 +67,7 @@ public static class ReportsEndpoints
             (translationType, ordersGroup) => new OrdersTypeStatisticsDto
             (
                 translationType.TranslationTypeName,
-                ordersGroup.Count()       
+                ordersGroup.Count()
             ))
          .ToListAsync()).
          //todo
@@ -79,7 +81,7 @@ public static class ReportsEndpoints
     {
         //не берем полноценного пользовател, проверяем существование 
         var isUser = await db.Users.AnyAsync(u => u.Email == email);
-        if (!isUser) 
+        if (!isUser)
             return Results.NotFound("Пользователь не найден");
 
         var orders = await db.Orders
@@ -103,4 +105,14 @@ public static class ReportsEndpoints
         return Results.Ok(orders);
 
     }
+
+    public static async Task<IResult> GetOrderById(OrderId Id, AppDbContext db)
+    {
+        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == Id);
+        if (order is not null)
+            return Results.Ok(order);
+        else
+            return Results.NotFound("Заказ не найден");
+    }
+
 }
