@@ -1,4 +1,4 @@
-﻿@page "/reports/getOrdersByUser"
+﻿@page "/getOrdersByUser"
 @using System.Net.Http.Json
 @using System.Net
 @using Perevod36.Client.Shared.Dto.Orders
@@ -71,7 +71,11 @@
                             @foreach (var order in SortedOrders)
                             {
                                 <tr>
-                                    <td class="fw-semibold text-dark">@order.OrderNumber</td>
+                                    <td class="fw-semibold text-dark">
+                                        <a href="getOrderById/@order.Id" class="text-primary text-decoration-none-hover">
+                                            @order.OrderNumber
+                                        </a>
+                                    </td>
                                     <td>@order.Created.ToString("dd.MM.yyyy")</td>
                                     <td>@order.TranslationTypeName</td>
                                     <td>@order.Manager</td>

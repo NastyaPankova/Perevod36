@@ -1,20 +1,27 @@
-﻿@page "/reports/getReportsByDay"
+﻿@page "/reports/getReportsByPeriod"
 @using System.Net.Http.Json
 @using Perevod36.Client.Shared.Dto.Orders
 @inject HttpClient Http
 
 <div class="container mt-4">
     <div class="card shadow-sm p-4 mb-4">
-        <h3 class="mb-3 text-primary">Заказы за день</h3>
-        <div class="row align-items-center">
+        <h3 class="mb-3 text-primary">Заказы за период</h3>
+        <div class="row align-items-center g-3">
             <div class="col-md-4">
-              
-                <input type="date" class="form-control" @bind-value="SelectedDate" @bind-value:event="onchange"/>
+                <div class="input-group">
+                    <span class="input-group-text">С</span>
+                    <input type="date" class="form-control" @bind-value="FromDate" @bind-value:event="onchange" />
+                </div>
             </div>
             <div class="col-md-4">
-                <!--   <button class="btn btn-primary w-100" @onclick="FetchOrdersAsync">Обновить</button> -->
-                <button type="button" class="btn btn-primary d-flex align-items-center" @onclick="FetchOrdersAsync">
-                    <i class="bi bi-arrow-clockwise" style="font-size: 1.1rem;"></i>
+                <div class="input-group">
+                    <span class="input-group-text">По</span>
+                    <input type="date" class="form-control" @bind-value="ToDate" @bind-value:event="onchange" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-primary d-flex align-items-center justify-content-center w-100" @onclick="FetchOrdersAsync">
+                    <i class="bi bi-arrow-clockwise me-2" style="font-size: 1.1rem;"></i> Обновить
                 </button>
             </div>
         </div>
@@ -31,21 +38,20 @@
     else if (Data == null || !Data.Orders.Any())
     {
         <div class="alert alert-info text-center">
-            Заказов на выбранную дату не найдено
+            Заказов за выбранный период не найдено
         </div>
     }
     else
     {
-       
         <div class="row mb-4">
             <div class="col-md-6">
                 <div class="p-3 bg-light border rounded">
-                    <h5>Заказы от: <span class="text-secondary">@Data.Date</span></h5>
+                    <h5>Период: <span class="text-secondary">@FromDate.ToString("dd.MM.yyyy") — @ToDate.ToString("dd.MM.yyyy")</span></h5>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="p-3 bg-success text-white border rounded">
-                    <h5>Сумма заказов за день: <strong>@Data.Total.ToString("C")</strong></h5>
+                    <h5>Сумма заказов за период: <strong>@Data.Total.ToString("C")</strong></h5>
                 </div>
             </div>
         </div>
@@ -55,6 +61,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Номер заказа</th>
+                        <th>Дата создания</th>
                         <th>Документ для перевода</th>
                         <th>Стоимость заказа</th>
                         <th>Кол-во страниц</th>
@@ -67,7 +74,12 @@
                     @foreach (var order in Data.Orders)
                     {
                         <tr>
-                            <td class="fw-bold text-dark">@order.OrderNumber</td>
+                            <td class="fw-bold text-dark">
+                                <a href="getOrderById/@order.Id" class="text-primary text-decoration-none-hover">
+                                    @order.OrderNumber
+                                </a>
+                            </td>
+                            <td>@order.Created.ToString("dd.MM.yyyy")</td>
                             <td>@order.TranslationTypeName</td>
                             <td>@order.Cost.ToString("C")</td>
                             <td>@order.NumberOfPages</td>
@@ -83,8 +95,9 @@
 </div>
 
 @code {
-    private DateTime SelectedDate { get; set; } = DateTime.UtcNow.Date;
-    private ReportsByDayDto? Data { get; set; }
+    private DateTime FromDate { get; set; } = DateTime.UtcNow.Date;
+    private DateTime ToDate { get; set; } = DateTime.UtcNow.Date;
+    private ReportsByPeriodDto? Data { get; set; }
     private bool IsLoading { get; set; } = false;
 
     protected override async Task OnInitializedAsync()
@@ -97,11 +110,14 @@
         IsLoading = true;
         try
         {
-            string formattedDate = SelectedDate.ToString("yyyy-MM-dd");
-            var url = $"/api/v1/reports/getReportsByDay/{formattedDate}";
-            Data = await Http.GetFromJsonAsync<ReportsByDayDto>(url);
+            string from = FromDate.ToString("yyyy-MM-dd");
+            string to = ToDate.ToString("yyyy-MM-dd");
+
+            var url = $"/api/v1/reports/getReportsByPeriod?fromDate={from}&toDate={to}";
+
+            Data = await Http.GetFromJsonAsync<ReportsByPeriodDto>(url);
         }
-        catch (Exception ex)
+         catch (Exception ex)
         {
             Console.WriteLine($"Ошибка при загрузке данных: {ex.Message}");
             Data = null;

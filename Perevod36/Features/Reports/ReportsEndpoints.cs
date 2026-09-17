@@ -2,6 +2,7 @@
 using Perevod36.Client.Shared.Dto.Orders;
 using Perevod36.Data;
 using Perevod36.Features.Common;
+using System.Data;
 
 
 namespace Perevod36.Features.Orders;
@@ -16,23 +17,27 @@ public static class ReportsEndpoints
 
         var reportsGroup = app.MapGroup("/api/v1/reports");
 
-        reportsGroup.MapGet("getReportsByDay/{date:datetime}", GetReportsByDay);
+        reportsGroup.MapGet("getReportsByPeriod/", GetReportsByPeriod);
         reportsGroup.MapGet("getOrdersTypeStatistics/", GetOrdersTypeStatistics);
         reportsGroup.MapGet("getOrdersByUser/", GetOrdersByUser);
-        reportsGroup.MapGet("getOrderById/", GetOrderById);
+        //если передаем что-то, кроме int, метод не вызывается
+        reportsGroup.MapGet("getOrderById/{id:int}", GetOrderById);
 
         return app;
     }
 
     //date придет из URL, db из DI, в mapget параметры не передаются
-    public static async Task<IResult> GetReportsByDay(DateTime date, AppDbContext db)
+    public static async Task<IResult> GetReportsByPeriod(DateTime fromDate, DateTime toDate, AppDbContext db)
     {
+        var from = DateOnly.FromDateTime(fromDate);
+        var to = DateOnly.FromDateTime(toDate);
 
         var orders = await db.Orders
             .AsNoTracking()
-            .Where(o => o.Created == DateOnly.FromDateTime(date))
+            .Where(o => o.Created >= from && o.Created <= to)
             .Select(s => new OrderDto
             (
+                s.Id.Id,
                 s.OrderNumber,
                 s.Created,
                 s.TranslationType.TranslationTypeName,
@@ -45,9 +50,10 @@ public static class ReportsEndpoints
 
         decimal total = orders.Sum(o => o.Cost);
 
-        var response = new ReportsByDayDto
+        var response = new ReportsByPeriodDto
         (
-            DateOnly.FromDateTime(date),
+            from,
+            to,
             total,
             orders
         );
@@ -89,6 +95,7 @@ public static class ReportsEndpoints
              .Where(o => o.Customer.Email == email)
              .Select(s => new OrderDto
               (
+                s.Id.Id,
                 s.OrderNumber,
                 s.Created,
                 s.TranslationType.TranslationTypeName,
@@ -106,9 +113,10 @@ public static class ReportsEndpoints
 
     }
 
-    public static async Task<IResult> GetOrderById(OrderId Id, AppDbContext db)
+    public static async Task<IResult> GetOrderById(int id, AppDbContext db)
     {
-        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == Id);
+        var orderId = new OrderId(id);
+        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is not null)
             return Results.Ok(order);
         else
