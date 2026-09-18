@@ -91,7 +91,7 @@ public static class ReportsEndpoints
             return Results.NotFound("Пользователь не найден");
 
         var orders = await db.Orders
-            .AsNoTracking()
+             .AsNoTracking()
              .Where(o => o.Customer.Email == email)
              .Select(s => new OrderDto
               (
@@ -116,9 +116,28 @@ public static class ReportsEndpoints
     public static async Task<IResult> GetOrderById(int id, AppDbContext db)
     {
         var orderId = new OrderId(id);
-        var order = await db.Orders.FirstOrDefaultAsync(o => o.Id == orderId);
+        var order = await db.Orders
+              .AsNoTracking()
+              .Include(o => o.TranslationType)
+              .Include(o => o.Customer)
+              .Include(o => o.Manager)
+              .Include(o => o.Translator)
+              .FirstOrDefaultAsync(o => o.Id == orderId);
         if (order is not null)
-            return Results.Ok(order);
+        {
+            var response = new OrderDto
+                (
+                order.Id.Id,
+                order.OrderNumber,
+                order.Created,
+                order.TranslationType.TranslationTypeName,
+                order.Customer.FullName,
+                order.Manager.FullName,
+                order.Translator.FullName,
+                order.NumberOfPages,
+                order.Cost);
+            return Results.Ok(response);
+        }
         else
             return Results.NotFound("Заказ не найден");
     }
